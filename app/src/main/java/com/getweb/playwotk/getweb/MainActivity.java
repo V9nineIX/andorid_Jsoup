@@ -25,8 +25,9 @@ import static java.lang.String.*;
 public class MainActivity extends AppCompatActivity {
 
     private ProgressDialog mProgressDialog;
-    private String url = "https://mobile.facebook.com/bnk48official.cherprang/";
-    //private String url = "https://m.facebook.com/pg/bnk48official.cherprang/posts/?ref=page_internal&mt_nav=0";
+   // private String url = "https://mobile.facebook.com/bnk48official.cherprang/";
+    private String url = "https://m.facebook.com/pg/bnk48official.cherprang/posts/?ref=page_internal&mt_nav=0";
+    private String community_url ="https://m.facebook.com/pg/bnk48official.cherprang/community/";
     private ArrayList<String> mAuthorNameList = new ArrayList<>();
     private ArrayList<String> mBlogUploadDateList = new ArrayList<>();
     private ArrayList<String> mBlogTitleList = new ArrayList<>();
@@ -47,11 +48,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            mProgressDialog = new ProgressDialog(MainActivity.this);
-            mProgressDialog.setTitle("Android Basic JSoup Tutorial");
-            mProgressDialog.setMessage("Loading...");
-            mProgressDialog.setIndeterminate(false);
-            mProgressDialog.show();
+//            mProgressDialog = new ProgressDialog(MainActivity.this);
+//            mProgressDialog.setTitle("Android Basic JSoup Tutorial");
+//            mProgressDialog.setMessage("Loading...");
+//            mProgressDialog.setIndeterminate(false);
+//            mProgressDialog.show();
         }
 
         @Override
@@ -68,12 +69,34 @@ public class MainActivity extends AppCompatActivity {
                         .method(Connection.Method.POST)
                         .execute();
 
+                //Todo  get total like and follow
+                Document commun_page = Jsoup.connect(community_url).timeout(120000).cookies(facebook.cookies()).get();
+                Element reactionEle = commun_page.selectFirst("div[data-sigil='reaction-unit-logging']").selectFirst("div").selectFirst("div");
+                String TotalLike  = reactionEle.select("div[class='_3_9m']").first().text();
+                String TotalFollow  = reactionEle.select("div[class='_3_9m']").last().text();
+
+                //Todo get static of lasted post
+
                 Document doc = Jsoup.connect(url).timeout(120000).cookies(facebook.cookies()).get();
-                Element descTag = doc.select("meta[name='description']").get(0);
-                String content = descTag.attr("content");
 
-                Log.i("get  web" , content.toString());
 
+                // Todo: get title or first post
+                Element storyContianer = doc.select("div[data-ad-preview='message']").get(0);
+                String text = storyContianer.text();
+
+                // Todo:  Get like of first post
+                Element storyFooter =  doc.selectFirst("footer");
+                String storyLikeCount =  storyFooter.select("div[data-sigil='reactions-sentence-container']")
+                                     .first().select("div").last().text();
+
+//                // Todo : Get commnet count of first post
+                  Element commentEle =  storyFooter.select("span[data-sigil='comments-token']").first();
+                  String storyCommentCount = commentEle.text();
+                  String storyShareCount = commentEle.nextElementSibling().text();
+
+
+                Log.i("get  web" , "get web");
+                //get story
 
             } catch (IOException e) {
                 e.printStackTrace();
